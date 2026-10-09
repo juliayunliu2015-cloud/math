@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fff">
+<title>Math Memory Map - Print Edition</title>
+<style>
+  * { box-sizing: border-box; }
+  :root { color-scheme: light; --ink: #111; --muted: #444; --line: #888; }
+  body { margin: 0; background: #fff; color: var(--ink); font: 12px/1.35 Arial, Helvetica, sans-serif; }
+  .sheet { max-width: 960px; margin: 0 auto; padding: 26px 30px; }
+  .masthead { display: flex; justify-content: space-between; align-items: end; gap: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); margin-bottom: 14px; }
+  .eyebrow { margin-bottom: 4px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  h1 { margin: 0; font: 700 36px/1 Georgia, "Times New Roman", serif; }
+  .subtitle { margin: 7px 0 0; color: var(--muted); }
+  .masthead-side { text-align: right; color: var(--muted); font-weight: 700; white-space: nowrap; }
+  .masthead-side strong { display: block; color: var(--ink); font: 700 28px/1 Georgia, "Times New Roman", serif; }
+  .content { display: grid; grid-template-columns: 1.08fr .92fr; gap: 14px 22px; align-items: start; }
+  .section { min-width: 0; padding-top: 8px; border-top: 2px solid var(--ink); break-inside: avoid; }
+  .section.multiplication { grid-column: 1 / -1; }
+  .section-heading { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+  .section-number { font-size: 10px; font-weight: 700; }
+  h2 { margin: 0; font: 700 19px/1.1 Georgia, "Times New Roman", serif; }
+  .section-intro { margin: 0 0 7px; color: var(--muted); font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th { padding: 3px 5px; color: var(--muted); font-size: 9px; text-align: left; text-transform: uppercase; }
+  td { padding: 3px 5px; border-top: 1px solid #bbb; }
+  .squares-table { font-size: 11px; }
+  .squares-table td:nth-child(2), .squares-table td:nth-child(4) { font-weight: 700; }
+  .rule { margin-top: 8px; padding: 7px 9px; border: 1px solid var(--ink); border-left-width: 4px; }
+  .rule p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+  .triangle-rule { display: flex; align-items: center; gap: 10px; margin: 4px 0 8px; }
+  .triangle-mark { width: 30px; height: 27px; flex: none; border-left: 1px solid var(--ink); border-bottom: 1px solid var(--ink); position: relative; }
+  .triangle-mark::after { content: ""; position: absolute; left: 2px; bottom: 2px; width: 24px; border-top: 1px dashed var(--line); transform: rotate(-45deg); transform-origin: left center; }
+  .equation { display: inline-block; padding: 4px 9px; border: 1px solid var(--ink); font: 700 19px Georgia, "Times New Roman", serif; }
+  .triple-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin: 0; padding: 0; list-style: none; }
+  .triple-list li { padding: 4px 0; border-top: 1px solid #bbb; }
+  .triple-list strong { font-size: 13px; }
+  .triple-list span { display: block; color: var(--muted); font-size: 9px; }
+  .triple-checks { margin-top: 7px; padding: 6px 8px; border: 1px solid #888; color: var(--muted); font-size: 10px; }
+  .formula-table { font-size: 10px; }
+  .formula-table th:first-child, .formula-table td:first-child { padding-left: 0; }
+  .formula-table td { vertical-align: top; }
+  .formula-table td:first-child { font-weight: 700; }
+  .math { font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-size: 11px; white-space: nowrap; }
+  .circle-note, .repeat-note { margin: 6px 0 0; color: var(--muted); font-size: 9px; }
+  .conversion-table { font-size: 11px; }
+  .conversion-table td:first-child { font-weight: 700; }
+  .conversion-table td:last-child { font-weight: 700; }
+  .multiply-shortcuts { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 10px 18px; align-items: start; }
+  .multiply-rule { color: var(--muted); font-size: 10px; }
+  .multiply-rule p { margin: 0 0 4px; }
+  .multiply-rule strong { color: var(--ink); }
+  .multiply-rule .math { color: var(--ink); font-size: 13px; font-weight: 700; white-space: normal; }
+  .multiply-examples { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; }
+  .multiply-examples div { padding: 4px 0; border-top: 1px solid #bbb; }
+  .multiply-examples strong { font: 700 13px Georgia, "Times New Roman", serif; white-space: nowrap; }
+  .bottomline { display: flex; justify-content: space-between; gap: 12px; margin-top: 13px; padding-top: 8px; border-top: 1px solid var(--ink); color: var(--muted); font-size: 10px; }
+  .actions { display: flex; gap: 12px; }
+  .actions a, .actions button { padding: 0; border: 0; background: none; color: var(--ink); font: 700 10px Arial, Helvetica, sans-serif; text-decoration: underline; cursor: pointer; }
+  @media (max-width: 680px) {
+    .sheet { padding: 20px 16px; }
+    .masthead { align-items: start; flex-direction: column; gap: 8px; }
+    .masthead-side { display: flex; align-items: baseline; gap: 8px; }
+    .masthead-side strong { font-size: 22px; }
+    .content { grid-template-columns: 1fr; gap: 18px; }
+    .section.multiplication { grid-column: auto; }
+    .multiply-shortcuts { grid-template-columns: 1fr; }
+    .multiply-examples { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .bottomline { flex-direction: column; }
+  }
+  @media print {
+    @page { size: letter portrait; margin: 0.35in; }
+    body { font-size: 10px; }
+    .sheet { max-width: none; padding: 0; }
+    .masthead { padding-bottom: 9px; margin-bottom: 10px; }
+    h1 { font-size: 32px; }
+    .content { grid-template-columns: 1.08fr .92fr; gap: 10px 18px; }
+    .section.multiplication { grid-column: 1 / -1; }
+    .section { padding-top: 6px; }
+    .section-heading { margin-bottom: 4px; }
+    h2 { font-size: 17px; }
+    .section-intro { margin-bottom: 5px; }
+    th, td { padding-top: 2px; padding-bottom: 2px; }
+    .rule { margin-top: 6px; padding: 5px 7px; }
+    .triangle-rule { margin-bottom: 5px; }
+    .triple-list { gap: 2px 8px; }
+    .triple-list li { padding: 3px 0; }
+    .triple-checks { margin-top: 5px; padding: 5px 7px; }
+    .bottomline { margin-top: 9px; padding-top: 6px; }
+    .actions { display: none; }
+    * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+  <header class="masthead">
+    <div>
+      <div class="eyebrow">Quick-recall study sheet / print edition</div>
+      <h1>Math Memory Map</h1>
+      <p class="subtitle">Five sets of facts that make mental math and geometry faster.</p>
+    </div>
+    <div class="masthead-side"><strong>5</strong> things to know by heart</div>
+  </header>
+
+  <div class="content">
+    <section class="section squares" aria-labelledby="squares-title">
+      <div class="section-heading"><span class="section-number">01</span><h2 id="squares-title">Square numbers</h2></div>
+      <p class="section-intro">Know these from 11 squared through 25 squared.</p>
+      <table class="squares-table">
+        <thead><tr><th>n</th><th>n<sup>2</sup></th><th>n</th><th>n<sup>2</sup></th></tr></thead>
+        <tbody>
+          <tr><td>11</td><td>121</td><td>19</td><td>361</td></tr>
+          <tr><td>12</td><td>144</td><td>20</td><td>400</td></tr>
+          <tr><td>13</td><td>169</td><td>21</td><td>441</td></tr>
+          <tr><td>14</td><td>196</td><td>22</td><td>484</td></tr>
+          <tr><td>15</td><td>225</td><td>23</td><td>529</td></tr>
+          <tr><td>16</td><td>256</td><td>24</td><td>576</td></tr>
+          <tr><td>17</td><td>289</td><td>25</td><td>625</td></tr>
+          <tr><td>18</td><td>324</td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <div class="rule"><strong>Ends in 5?</strong> Multiply the tens digit by the next number, then put 25 at the end.
+        <p>25 squared: 2 x 3, then 25 = 625 | 35 squared = 1225 | 85 squared = 7225</p>
+      </div>
+    </section>
+
+    <section class="section triangles" aria-labelledby="triangles-title">
+      <div class="section-heading"><span class="section-number">02</span><h2 id="triangles-title">Right triangles</h2></div>
+      <p class="section-intro">For legs a and b, and hypotenuse c (opposite the right angle):</p>
+      <div class="triangle-rule"><span class="triangle-mark" aria-hidden="true"></span><span class="equation">a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></span></div>
+      <p class="section-intro">Common Pythagorean triples. Scaled sets keep the same triangle shape.</p>
+      <ul class="triple-list">
+        <li><strong>3 - 4 - 5</strong><span>also 6-8-10, 9-12-15, 12-16-20</span></li>
+        <li><strong>5 - 12 - 13</strong><span>also 10-24-26</span></li>
+        <li><strong>8 - 15 - 17</strong></li>
+        <li><strong>7 - 24 - 25</strong></li>
+        <li><strong>9 - 40 - 41</strong></li>
+        <li><strong>12 - 35 - 37</strong></li>
+        <li><strong>20 - 21 - 29</strong></li>
+      </ul>
+      <div class="triple-checks"><strong>Check:</strong> 9<sup>2</sup> + 40<sup>2</sup> = 81 + 1600 = 1681 = 41<sup>2</sup>; 20<sup>2</sup> + 21<sup>2</sup> = 400 + 441 = 841 = 29<sup>2</sup>.</div>
+    </section>
+
+    <section class="section geometry" aria-labelledby="geometry-title">
+      <div class="section-heading"><span class="section-number">03</span><h2 id="geometry-title">Area &amp; perimeter</h2></div>
+      <p class="section-intro">Area measures the inside; perimeter measures the boundary.</p>
+      <table class="formula-table">
+        <thead><tr><th>Shape</th><th>Area (A)</th><th>Perimeter (P)</th></tr></thead>
+        <tbody>
+          <tr><td>Triangle</td><td class="math">(b x h) / 2</td><td class="math">a + b + c</td></tr>
+          <tr><td>Rectangle</td><td class="math">l x w</td><td class="math">2(l + w)</td></tr>
+          <tr><td>Parallelogram</td><td class="math">b x h</td><td class="math">2(a + b)</td></tr>
+          <tr><td>Trapezoid</td><td class="math">((a + b) / 2) x h</td><td>sum of all sides</td></tr>
+          <tr><td>Circle</td><td class="math">πr<sup>2</sup></td><td class="math">C = 2πr = πd</td></tr>
+        </tbody>
+      </table>
+      <p class="circle-note">Trapezoid: a and b are the parallel sides. Circle: r is radius; d is diameter.</p>
+    </section>
+
+    <section class="section conversions" aria-labelledby="conversions-title">
+      <div class="section-heading"><span class="section-number">04</span><h2 id="conversions-title">Fraction to decimal to percent</h2></div>
+      <p class="section-intro">Learn the whole row as one connected fact.</p>
+      <table class="conversion-table">
+        <thead><tr><th>Fraction</th><th>Decimal</th><th>Percent</th></tr></thead>
+        <tbody>
+          <tr><td>1/8</td><td>0.125</td><td>12.5%</td></tr>
+          <tr><td>1/6</td><td>0.166...</td><td>16.67%</td></tr>
+          <tr><td>1/5</td><td>0.2</td><td>20%</td></tr>
+          <tr><td>1/4</td><td>0.25</td><td>25%</td></tr>
+          <tr><td>1/3</td><td>0.333...</td><td>33.33%</td></tr>
+          <tr><td>3/8</td><td>0.375</td><td>37.5%</td></tr>
+          <tr><td>5/8</td><td>0.625</td><td>62.5%</td></tr>
+          <tr><td>7/8</td><td>0.875</td><td>87.5%</td></tr>
+        </tbody>
+      </table>
+      <p class="repeat-note">The ellipsis (...) means the digits repeat. Percent values are rounded where needed.</p>
+    </section>
+
+    <section class="section multiplication" aria-labelledby="multiplication-title">
+      <div class="section-heading"><span class="section-number">05</span><h2 id="multiplication-title">Fast multiplication by 25 &amp; 125</h2></div>
+      <div class="multiply-shortcuts">
+        <div class="multiply-rule"><p><strong>For 25:</strong> turn it into 100, then divide by 4.</p><span class="math">25 x n = (100 x n) / 4</span></div>
+        <div class="multiply-rule"><p><strong>For 125:</strong> turn it into 1000, then divide by 8.</p><span class="math">125 x n = (1000 x n) / 8</span></div>
+        <div class="multiply-examples" aria-label="Quick multiplication examples">
+          <div><strong>25 x 4 = 100</strong></div>
+          <div><strong>25 x 8 = 200</strong></div>
+          <div><strong>25 x 12 = 300</strong></div>
+          <div><strong>125 x 4 = 500</strong></div>
+          <div><strong>125 x 8 = 1000</strong></div>
+          <div><strong>125 x 16 = 2000</strong></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="bottomline">
+    <div><strong>Quick check:</strong> Can you recall each group without looking?</div>
+    <div class="actions"><a href="infographic.html">Color version</a><button type="button" onclick="window.print()">Print / Save PDF</button></div>
+  </footer>
+</main>
+</body>
+</html>
