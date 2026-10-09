@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vivian's Math Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6efff; --card: #ffffff; --text: #3b2a5c; --muted: #8a76ab;
+    --border: #e7dbfb; --accent: #9b5de5; --accent-2: #c77dff; --accent-deep: #7b3fc4;
+    --accent-soft: #f1e6ff; --pink: #ff8fc8;
+    --good: #23a46c; --good-soft: #e2f8ed; --bad: #e0457b; --bad-soft: #ffe6ef;
+    --shadow: 0 10px 30px rgba(123, 63, 196, .12);
+    --blob-1: #e9d5ff; --blob-2: #fbd5f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1326; --card: #251b36; --text: #f1e8ff; --muted: #b7a6d6;
+      --border: #3c2d57; --accent: #b58cff; --accent-2: #d3a6ff; --accent-deep: #8e5ce0;
+      --accent-soft: #33244d; --pink: #ff9fd2;
+      --good: #6be3a8; --good-soft: #173a2b; --bad: #ff8fb1; --bad-soft: #43202e;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+      --blob-1: #2f1f4a; --blob-2: #3a1d3c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    font: 17px/1.5 "Nunito", system-ui, "Segoe UI", sans-serif; font-weight: 600;
+    background:
+      radial-gradient(circle at 10% 10%, var(--blob-1) 0, transparent 40%),
+      radial-gradient(circle at 90% 30%, var(--blob-2) 0, transparent 35%),
+      radial-gradient(circle at 30% 90%, var(--blob-1) 0, transparent 40%),
+      var(--bg);
+    background-attachment: fixed;
+  }
+  main { position: relative; max-width: 660px; margin: 0 auto; padding: 20px 16px 48px; }
+  h2 { font-size: 1.15rem; margin: 0 0 12px; font-weight: 800; }
+  .card {
+    background: var(--card); border: 2px solid var(--border); border-radius: 24px;
+    padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .hidden { display: none !important; }
+  .muted { color: var(--muted); }
+
+  /* Floating sparkles */
+  .sparkles { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .sparkles span {
+    position: absolute; color: var(--accent-2); opacity: .55;
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float { 50% { transform: translateY(-14px) rotate(15deg); opacity: .9; } }
+  main > * { position: relative; z-index: 1; }
+
+  /* Hero */
+  .hero {
+    position: relative; border-radius: 28px; overflow: hidden; margin-bottom: 16px;
+    aspect-ratio: 2 / 1; min-height: 230px; box-shadow: var(--shadow); border: 3px solid var(--card);
+    background:
+      radial-gradient(circle at 75% 45%, rgba(255, 255, 255, .45) 0, transparent 38%),
+      linear-gradient(135deg, #7b3fc4 0%, #9b5de5 45%, #e0a3ff 100%);
+  }
+  .hero .girl {
+    position: absolute; right: -12%; top: 2%; height: 140%; width: auto;
+    filter: drop-shadow(0 6px 14px rgba(60, 20, 110, .35));
+    animation: sway 4s ease-in-out infinite; transform-origin: bottom center;
+  }
+  @keyframes sway { 50% { transform: translateY(-6px) rotate(-1.5deg); } }
+  .hero-text { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: #fff; max-width: 48%; z-index: 1; }
+  @media (max-width: 500px) {
+    .hero .girl { right: -25%; }
+    .hero-text { max-width: 46%; }
+  }
+  .hero h1 { margin: 0; font-size: clamp(1.6rem, 6vw, 2.4rem); font-weight: 900; line-height: 1.1; text-shadow: 0 2px 10px rgba(60, 20, 110, .4); }
+  .hero p { margin: 6px 0 0; font-size: clamp(.85rem, 2.6vw, 1rem); opacity: .95; }
+
+  /* Setup */
+  .topics { display: grid; gap: 10px; }
+  .topic {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer;
+    border: 2px solid var(--border); border-radius: 16px; transition: border-color .15s, background .15s;
+  }
+  .topic:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .topic input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .topic .emoji { font-size: 1.3rem; }
+  .topic small { color: var(--muted); margin-left: auto; white-space: nowrap; }
+  .counts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .counts label {
+    padding: 8px 20px; border: 2px solid var(--border); border-radius: 999px; cursor: pointer; font-weight: 800;
+  }
+  .counts input { display: none; }
+  .counts label:has(input:checked) {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; border-color: transparent;
+  }
+
+  button {
+    font: inherit; font-weight: 800; cursor: pointer; border-radius: 999px;
+    border: 2px solid var(--border); background: var(--card); color: var(--text); padding: 10px 22px;
+    transition: transform .1s, box-shadow .1s;
+  }
+  button:active:not(:disabled) { transform: translateY(2px); }
+  button.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; color: #fff;
+    box-shadow: 0 4px 0 var(--accent-deep);
+  }
+  button.primary:active:not(:disabled) { box-shadow: 0 2px 0 var(--accent-deep); }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+  .big { font-size: 1.15rem; padding: 12px 30px; }
+
+  /* Character + speech bubble */
+  .buddy { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .avatar {
+    --s: 76px; flex: none; width: var(--s); height: var(--s); border-radius: 50%;
+    background: url("pngtree-cute-anime-style-girl-png-image_21036715.png") no-repeat, var(--accent-soft);
+    /* zoom in on her face */
+    background-size: calc(var(--s) * 2.3) auto;
+    background-position: calc(var(--s) * -0.55) calc(var(--s) * -0.5);
+    border: 3px solid var(--accent-2); box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  .avatar.bounce { animation: bounce .5s; }
+  .avatar.shake { animation: shake .4s; }
+  @keyframes bounce { 40% { transform: translateY(-10px) scale(1.06); } }
+  @keyframes shake { 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+  .bubble {
+    position: relative; background: var(--accent-soft); color: var(--text); padding: 10px 14px;
+    border-radius: 18px; font-weight: 700;
+  }
+  .bubble::before {
+    content: ""; position: absolute; left: -8px; top: 50%; transform: translateY(-50%);
+    border: 8px solid transparent; border-left: 0; border-right-color: var(--accent-soft);
+  }
+
+  /* Quiz */
+  .progress-text { display: flex; justify-content: space-between; color: var(--muted); font-size: .9rem; font-weight: 800; }
+  .bar { height: 12px; background: var(--card); border: 2px solid var(--border); border-radius: 999px; overflow: hidden; margin: 6px 0 14px; }
+  .bar > div {
+    height: 100%; width: 0; border-radius: 999px; transition: width .3s;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+  }
+  .tag {
+    display: inline-block; font-size: .78rem; color: var(--accent-deep); background: var(--accent-soft);
+    padding: 3px 12px; border-radius: 999px; margin-bottom: 10px; font-weight: 800;
+  }
+  @media (prefers-color-scheme: dark) { .tag { color: var(--accent-2); } }
+  .prompt { font-size: 1.35rem; margin: 0 0 18px; font-weight: 800; }
+  .options { display: grid; gap: 10px; }
+  .opt {
+    display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+    padding: 12px 16px; font-size: 1.1rem; border-radius: 18px; font-weight: 700;
+    box-shadow: 0 3px 0 var(--border);
+  }
+  .opt .key {
+    flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-size: .9rem;
+  }
+  .opt:not(:disabled):hover { border-color: var(--accent-2); background: var(--accent-soft); }
+  .opt.correct { background: var(--good-soft); border-color: var(--good); opacity: 1; box-shadow: 0 3px 0 var(--good); }
+  .opt.correct .key { background: var(--good); }
+  .opt.wrong { background: var(--bad-soft); border-color: var(--bad); opacity: 1; box-shadow: 0 3px 0 var(--bad); }
+  .opt.wrong .key { background: var(--bad); }
+  .feedback { margin-top: 16px; padding: 12px 16px; border-radius: 16px; font-weight: 600; }
+  .feedback.good { background: var(--good-soft); }
+  .feedback.bad { background: var(--bad-soft); }
+  .feedback b { display: block; margin-bottom: 2px; font-weight: 800; }
+
+  /* Burst of hearts on a correct answer */
+  .pop { position: fixed; pointer-events: none; z-index: 10; font-size: 1.3rem; animation: pop .9s ease-out forwards; }
+  @keyframes pop {
+    to { transform: translate(var(--dx), var(--dy)) scale(.4) rotate(var(--r)); opacity: 0; }
+  }
+
+  /* Results */
+  .result-top { text-align: center; }
+  .result-top .avatar { --s: 110px; margin: 0 auto 10px; }
+  .stars { font-size: 2.4rem; letter-spacing: 6px; margin: 4px 0; }
+  .stars .off { filter: grayscale(1); opacity: .3; }
+  .score { font-size: 3rem; font-weight: 900; margin: 0; color: var(--accent); line-height: 1.1; }
+  .breakdown { display: grid; gap: 6px; margin-top: 14px; text-align: left; }
+  .breakdown div { display: flex; justify-content: space-between; border-bottom: 2px dashed var(--border); padding: 4px 0; }
+  .result-top .row { justify-content: center; }
+  .missed { padding-left: 22px; margin: 0; }
+  .missed li { margin-bottom: 12px; }
+  .missed .ans { color: var(--good); font-weight: 800; }
+  .missed .yours { color: var(--bad); }
+
+  /* Math helpers */
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .85em; line-height: 1.1; margin: 0 2px; }
+  .frac > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 3px; }
+  .m { font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-style: normal; font-weight: 400; }
+  kbd { font: inherit; font-size: .8em; border: 2px solid var(--border); border-radius: 6px; padding: 0 6px; }
+  .tip { text-align: center; font-size: .9rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="sparkles" id="sparkles" aria-hidden="true"></div>
+<main>
+  <!-- Setup screen -->
+  <section id="setup">
+    <div class="hero">
+      <img class="girl" src="pngtree-cute-anime-style-girl-png-image_21036715.png" alt="Cute anime girl in a yellow bunny hoodie">
+      <div class="hero-text">
+        <h1>Hi Vivian! 💜</h1>
+        <p>Ready for a little math adventure? Let's practise the facts to remember ✨</p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🌸 Pick your topics</h2>
+      <div class="topics" id="topicList"></div>
+    </div>
+    <div class="card">
+      <h2>🦋 How many questions?</h2>
+      <div class="counts">
+        <label><input type="radio" name="count" value="10" checked>10</label>
+        <label><input type="radio" name="count" value="20">20</label>
+        <label><input type="radio" name="count" value="40">40</label>
+        <label><input type="radio" name="count" value="all">All</label>
+      </div>
+      <div class="row"><button class="primary big" id="startBtn">Let's go! 🚀</button></div>
+    </div>
+    <p class="tip muted">Tip: press <kbd>1</kbd>–<kbd>4</kbd> to answer and <kbd>Enter</kbd> for the next question.</p>
+  </section>
+
+  <!-- Quiz screen -->
+  <section id="quiz" class="hidden">
+    <div class="progress-text"><span id="progress"></span><span id="liveScore"></span></div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="card">
+      <div class="buddy">
+        <div class="avatar" id="quizAvatar"></div>
+        <div class="bubble" id="bubble"></div>
+      </div>
+      <span class="tag" id="qTopic"></span>
+      <p class="prompt" id="qPrompt"></p>
+      <div class="options" id="qOptions"></div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="row">
+        <button class="primary hidden" id="nextBtn">Next</button>
+        <button id="quitBtn">End test</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results screen -->
+  <section id="results" class="hidden">
+    <div class="card result-top">
+      <div class="avatar bounce"></div>
+      <h2 id="resultTitle"></h2>
+      <div class="stars" id="stars"></div>
+      <p class="score" id="scorePct"></p>
+      <p class="muted" id="scoreText" style="margin:0"></p>
+      <div class="breakdown" id="breakdown"></div>
+      <div class="row">
+        <button class="primary" id="retryBtn">Retry missed 🔁</button>
+        <button id="newBtn">New test 🌸</button>
+      </div>
+    </div>
+    <div class="card" id="missedCard">
+      <h2>📝 Let's remember these</h2>
+      <ol class="missed" id="missedList"></ol>
+    </div>
+  </section>
+</main>
+
+<script>
+const PLAYER = 'Vivian';
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const rand = n => Math.floor(Math.random() * n);
+const pick = arr => arr[rand(arr.length)];
+const shuffle = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+};
+const sq = n => `${n}<sup>2</sup>`;
+const frac = (a, b) => `<span class="frac"><span>${a}</span><span>${b}</span></span>`;
+const m = s => `<span class="m">${s}</span>`;
+
+// Correct answer plus up to 3 unique distractors from candidates.
+function makeChoices(correct, candidates) {
+  const out = [String(correct)];
+  for (const c of shuffle(candidates.map(String))) {
+    if (out.length === 4) break;
+    if (!out.includes(c)) out.push(c);
+  }
+  return out;
+}
+
+/* ---------- what the character says ---------- */
+const SAY = {
+  start: [`You can do it, ${PLAYER}! 💜`, `Take your time, ${PLAYER} ✨`, `I believe in you! 🐰`, `Let's think together 🌸`],
+  right: [`Yay! Amazing, ${PLAYER}! 💜`, `Perfect! ✨`, `You're so smart! 🌟`, `Wonderful! Bunny hop! 🐰`, `Nailed it! 🎉`],
+  wrong: [`Almost! Let's remember this one 🌙`, `That's okay, ${PLAYER}, you'll get it next time 💪`, `Oops! Read the tip below 💡`, `Don't worry — mistakes help us learn 🌱`],
+};
+
+/* ---------- topic 1: squares ---------- */
+function squareQuestions() {
+  const qs = [];
+  for (let n = 11; n <= 25; n++) {
+    const s = n * n;
+    qs.push({
+      prompt: `${m(sq(n))} = ?`,
+      correct: s,
+      candidates: [(n - 1) ** 2, (n + 1) ** 2, s + 10, s - 10, s + 20, s - n, s + n].filter(x => x > 0),
+      explain: `${n} × ${n} = ${s}`,
+    });
+    qs.push({
+      prompt: `Which number squared equals ${s}?`,
+      correct: n,
+      candidates: [n - 1, n + 1, n + 2, n - 2],
+      explain: `${m(sq(n))} = ${s}`,
+    });
+  }
+  // Pro tip: numbers ending in 5
+  for (let t = 1; t <= 9; t++) {
+    const n = t * 10 + 5, s = n * n;
+    qs.push({
+      prompt: `Use the “ends in 5” trick: ${m(sq(n))} = ?`,
+      correct: s,
+      candidates: [t * t * 100 + 25, t * (t + 1) * 100, (t + 1) * (t + 2) * 100 + 25, s + 100, s - 100].filter(x => x > 0 && x !== s),
+      explain: `${t} × ${t + 1} = ${t * (t + 1)}, then tack on 25 → ${s}`,
+    });
+  }
+  return qs;
+}
+
+/* ---------- topic 2: Pythagorean triples ---------- */
+const TRIPLES = [[3,4,5],[6,8,10],[9,12,15],[12,16,20],[5,12,13],[10,24,26],[8,15,17],[7,24,25]];
+const isRight = ([a, b, c]) => a * a + b * b === c * c;
+const fmtTriple = t => t.join(' – ');
+
+function tripleQuestions() {
+  const qs = [];
+  for (const [a, b, c] of TRIPLES) {
+    const why = `${m(sq(a))} + ${m(sq(b))} = ${a*a} + ${b*b} = ${c*c} = ${m(sq(c))}`;
+    qs.push({
+      prompt: `A right triangle has legs ${a} and ${b}. How long is the hypotenuse?`,
+      correct: c,
+      candidates: [a + b, c + 1, c - 1, c + 2, c - 2].filter(x => x !== c),
+      explain: why,
+    });
+    qs.push({
+      prompt: `A right triangle has a leg of ${a} and a hypotenuse of ${c}. How long is the other leg?`,
+      correct: b,
+      candidates: [b + 1, b - 1, b + 2, c - a, c + a].filter(x => x > 0 && x !== b),
+      explain: why,
+    });
+    const fakes = [[a, b, c + 1], [a, b + 1, c], [a + 1, b + 1, c + 1], [a, b, a + b], [a - 1, b, c]]
+      .filter(t => t[0] > 0 && !isRight(t));
+    qs.push({
+      prompt: `Which set of side lengths makes a right triangle?`,
+      correct: fmtTriple([a, b, c]),
+      candidates: fakes.map(fmtTriple),
+      explain: `${why}, so ${fmtTriple([a, b, c])} is a Pythagorean triple.`,
+    });
+  }
+  return qs;
+}
+
+/* ---------- topic 3: area & perimeter formulas ---------- */
+const FORMULAS = [
+  { shape: 'triangle', kind: 'area', sym: 'A', f: `${frac(1,2)} × b × h`,
+    wrong: ['b × h', `${frac(1,3)} × b × h`, `${frac(1,2)} × (b + h)`] },
+  { shape: 'triangle', kind: 'perimeter', sym: 'P', f: 'a + b + c', noReverse: true,
+    wrong: ['a × b × c', '2(a + b + c)', `${frac(1,2)}(a + b + c)`] },
+  { shape: 'rectangle', kind: 'area', sym: 'A', f: 'l × w',
+    wrong: ['2(l + w)', 'l + w', `${frac(1,2)} × l × w`] },
+  { shape: 'rectangle', kind: 'perimeter', sym: 'P', f: '2(l + w)', avoid: 'parallelogram',
+    wrong: ['l × w', 'l + w', '2l × w'] },
+  { shape: 'parallelogram', kind: 'area', sym: 'A', f: 'b × h',
+    wrong: [`${frac(1,2)} × b × h`, 'a × b', '2(b + h)'] },
+  { shape: 'parallelogram', kind: 'perimeter', sym: 'P', f: '2(a + b)', avoid: 'rectangle',
+    wrong: ['a + b', 'a × b', 'b × h'] },
+  { shape: 'trapezoid', kind: 'area', sym: 'A', f: `${frac('a + b', 2)} × h`,
+    wrong: ['(a + b) × h', 'a × b × h', `${frac('a × b', 2)} × h`] },
+  { shape: 'trapezoid', kind: 'perimeter', sym: 'P', f: 'sum of all sides', noReverse: true,
+    wrong: ['2(a + b)', `${frac('a + b', 2)} × h`, 'a + b'] },
+  { shape: 'circle', kind: 'area', sym: 'A', f: 'πr<sup>2</sup>',
+    wrong: ['2πr', 'πd', '2πr<sup>2</sup>'] },
+  { shape: 'circle', kind: 'circumference', sym: 'C', f: '2πr = πd',
+    wrong: ['πr<sup>2</sup>', 'πr', '2πd'] },
+];
+const label = x => `the ${x.kind} of a ${x.shape}`;
+
+function formulaQuestions() {
+  const qs = [];
+  for (const x of FORMULAS) {
+    const full = m(`${x.sym} = ${x.f}`);
+    qs.push({
+      prompt: `Which formula gives <b>${x.kind}</b> of a <b>${x.shape}</b>?`,
+      correct: full,
+      candidates: x.wrong.map(w => m(`${x.sym} = ${w}`)),
+      explain: `${label(x)[0].toUpperCase() + label(x).slice(1)}: ${full}`,
+    });
+    if (!x.noReverse) {
+      const others = FORMULAS.filter(o => o !== x && o.shape !== x.avoid);
+      // Prefer same-shape or same-kind distractors — they are the confusing ones.
+      const close = others.filter(o => o.shape === x.shape || o.kind === x.kind);
+      qs.push({
+        prompt: `${full} is the formula for…`,
+        correct: label(x),
+        candidates: (close.length >= 3 ? close : others).map(label),
+        explain: `${full} gives ${label(x)}.`,
+      });
+    }
+  }
+  return qs;
+}
+
+/* ---------- topic 4: fraction / decimal / percent ---------- */
+const EQUIV = [
+  { n: 1, d: 8, dec: '0.125', pct: '12.5%' },
+  { n: 1, d: 6, dec: '0.166…', pct: '16.67%' },
+  { n: 1, d: 5, dec: '0.2',   pct: '20%' },
+  { n: 1, d: 4, dec: '0.25',  pct: '25%' },
+  { n: 1, d: 3, dec: '0.333…', pct: '33.33%' },
+  { n: 3, d: 8, dec: '0.375', pct: '37.5%' },
+  { n: 5, d: 8, dec: '0.625', pct: '62.5%' },
+  { n: 7, d: 8, dec: '0.875', pct: '87.5%' },
+];
+const fr = e => m(frac(e.n, e.d));
+
+function fractionQuestions() {
+  const qs = [];
+  for (const e of EQUIV) {
+    const others = EQUIV.filter(o => o !== e);
+    const explain = `${fr(e)} = ${e.dec} = ${e.pct}`;
+    qs.push({ prompt: `${fr(e)} as a percent = ?`, correct: e.pct, candidates: others.map(o => o.pct), explain });
+    qs.push({ prompt: `${fr(e)} as a decimal = ?`, correct: e.dec, candidates: others.map(o => o.dec), explain });
+    qs.push({ prompt: `${e.pct} as a fraction = ?`, correct: fr(e), candidates: others.map(fr), explain });
+    qs.push({ prompt: `${e.dec} as a fraction = ?`, correct: fr(e), candidates: others.map(fr), explain });
+  }
+  return qs;
+}
+
+/* ---------- topics ---------- */
+const TOPICS = [
+  { id: 'squares',   emoji: '🔢', name: 'Squares (11² – 25², ends-in-5 trick)', build: squareQuestions },
+  { id: 'triples',   emoji: '📐', name: 'Right triangles & Pythagorean triples', build: tripleQuestions },
+  { id: 'formulas',  emoji: '⭕', name: 'Area & perimeter formulas',            build: formulaQuestions },
+  { id: 'fractions', emoji: '🍰', name: 'Fraction – decimal – percent',         build: fractionQuestions },
+];
+
+$('topicList').innerHTML = TOPICS.map(t =>
+  `<label class="topic"><input type="checkbox" value="${t.id}" checked><span class="emoji">${t.emoji}</span>${t.name}<small>${t.build().length} q</small></label>`
+).join('');
+
+// Background sparkles
+$('sparkles').innerHTML = Array.from({ length: 18 }, (_, i) =>
+  `<span style="left:${rand(100)}%;top:${rand(100)}%;font-size:${10 + rand(14)}px;animation-delay:-${rand(6)}s">${pick(['✦', '✧', '♡', '⋆'])}</span>`
+).join('');
+
+/* ---------- quiz state ---------- */
+let questions = [], index = 0, score = 0, answered = false, missed = [];
+
+// Fresh distractors and option order every time a question is shown.
+function prepare(q) {
+  return { ...q, options: shuffle(makeChoices(q.correct, q.candidates)), correct: String(q.correct) };
+}
+
+function show(id) {
+  for (const s of ['setup', 'quiz', 'results']) $(s).classList.toggle('hidden', s !== id);
+  window.scrollTo(0, 0);
+}
+
+function animate(el, cls) {
+  el.classList.remove('bounce', 'shake');
+  void el.offsetWidth; // restart the animation
+  el.classList.add(cls);
+}
+
+function burst(fromEl) {
+  const r = fromEl.getBoundingClientRect();
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement('span');
+    s.className = 'pop';
+    s.textContent = pick(['💜', '✨', '⭐', '🌸', '💖']);
+    s.style.left = `${r.left + r.width * Math.random()}px`;
+    s.style.top = `${r.top + r.height / 2}px`;
+    s.style.setProperty('--dx', `${(Math.random() - .5) * 220}px`);
+    s.style.setProperty('--dy', `${-60 - Math.random() * 140}px`);
+    s.style.setProperty('--r', `${(Math.random() - .5) * 180}deg`);
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 950);
+  }
+}
+
+function startTest(list) {
+  questions = list.map(prepare);
+  index = 0; score = 0; missed = [];
+  show('quiz');
+  render();
+}
+
+$('startBtn').onclick = () => {
+  const chosen = [...document.querySelectorAll('#topicList input:checked')].map(i => i.value);
+  if (!chosen.length) { alert(`Pick at least one topic, ${PLAYER}! 🌸`); return; }
+  const pool = shuffle(TOPICS.filter(t => chosen.includes(t.id))
+    .flatMap(t => t.build().map(q => ({ ...q, topic: `${t.emoji} ${t.name}` }))));
+  const count = document.querySelector('input[name=count]:checked').value;
+  startTest(count === 'all' ? pool : pool.slice(0, +count));
+};
+
+function render() {
+  const q = questions[index];
+  answered = false;
+  $('progress').textContent = `Question ${index + 1} of ${questions.length}`;
+  $('liveScore').textContent = `💜 ${score}`;
+  $('barFill').style.width = `${(index / questions.length) * 100}%`;
+  $('bubble').textContent = pick(SAY.start);
+  $('qTopic').textContent = q.topic;
+  $('qPrompt').innerHTML = q.prompt;
+  $('qOptions').innerHTML = q.options.map((o, i) =>
+    `<button class="opt" data-i="${i}"><span class="key">${i + 1}</span><span>${o}</span></button>`
+  ).join('');
+  $('qOptions').querySelectorAll('.opt').forEach(b => b.onclick = () => choose(+b.dataset.i));
+  $('feedback').className = 'feedback hidden';
+  $('nextBtn').classList.add('hidden');
+}
+
+function choose(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[index];
+  const picked = q.options[i];
+  const ok = picked === q.correct;
+  if (ok) score++; else missed.push({ ...q, picked });
+  q.result = ok;
+
+  const buttons = $('qOptions').querySelectorAll('.opt');
+  buttons.forEach((b, j) => {
+    b.disabled = true;
+    if (q.options[j] === q.correct) b.classList.add('correct');
+    else if (j === i) b.classList.add('wrong');
+  });
+  $('bubble').textContent = pick(ok ? SAY.right : SAY.wrong);
+  animate($('quizAvatar'), ok ? 'bounce' : 'shake');
+  if (ok) burst(buttons[i]);
+
+  const fb = $('feedback');
+  fb.className = `feedback ${ok ? 'good' : 'bad'}`;
+  fb.innerHTML = `<b>${ok ? 'Correct! 🎉' : 'Not quite — here’s the trick 💡'}</b>${q.explain}`;
+  $('liveScore').textContent = `💜 ${score}`;
+  const next = $('nextBtn');
+  next.textContent = index + 1 < questions.length ? 'Next ➜' : 'See results 🏆';
+  next.classList.remove('hidden');
+  next.focus();
+}
+
+function next() {
+  if (!answered) return;
+  index++;
+  if (index < questions.length) render(); else finish();
+}
+$('nextBtn').onclick = next;
+$('quitBtn').onclick = () => { questions = questions.slice(0, index + (answered ? 1 : 0)); finish(); };
+
+function finish() {
+  const total = questions.length;
+  const pct = total ? Math.round((score / total) * 100) : 0;
+  const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 40 ? 1 : 0;
+  $('resultTitle').textContent =
+    pct === 100 ? `Perfect score, ${PLAYER}! 🏆` :
+    pct >= 80 ? `Great job, ${PLAYER}! 🌟` :
+    pct >= 60 ? `Nice work, ${PLAYER}! Keep going 💪` :
+    `Good try, ${PLAYER}! Practice makes perfect 🌱`;
+  $('stars').innerHTML = [0, 1, 2].map(i => `<span class="${i < stars ? '' : 'off'}">⭐</span>`).join('');
+  $('scorePct').textContent = `${pct}%`;
+  $('scoreText').textContent = `${score} of ${total} correct`;
+
+  const byTopic = {};
+  for (const q of questions) {
+    const t = (byTopic[q.topic] ||= { right: 0, total: 0 });
+    t.total++; if (q.result) t.right++;
+  }
+  $('breakdown').innerHTML = Object.entries(byTopic)
+    .map(([name, t]) => `<div><span>${name}</span><span>${t.right} / ${t.total}</span></div>`).join('');
+
+  $('missedCard').classList.toggle('hidden', !missed.length);
+  $('missedList').innerHTML = missed.map(q =>
+    `<li>${q.prompt}<br><span class="yours">Your answer: ${q.picked}</span><br>` +
+    `<span class="ans">Correct: ${q.correct}</span><br><small class="muted">${q.explain}</small></li>`
+  ).join('');
+  $('retryBtn').disabled = !missed.length;
+  show('results');
+  if (pct >= 80) setTimeout(() => burst($('scorePct')), 200);
+}
+
+$('retryBtn').onclick = () => startTest(shuffle(missed));
+$('newBtn').onclick = () => show('setup');
+
+document.addEventListener('keydown', e => {
+  if ($('quiz').classList.contains('hidden')) return;
+  if (/^[1-4]$/.test(e.key) && !answered) choose(+e.key - 1);
+  else if (e.key === 'Enter' && answered) { e.preventDefault(); next(); }
+});
+</script>
+</body>
+</html>
